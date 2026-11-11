@@ -1,0 +1,7 @@
+"Please evaluate my project using two distinct benchmarks:
+
+    Industry Standard: Assuming the work of a professional Software Engineer in the tech industry.
+
+    Academic Standard: Assuming the work of a Computer Science student (evaluated at both entry-level/first semester and capstone/final semester expectations).
+
+Grade the project across 7–10 structured categories, such as Code Architecture, Scalability & Performance, Security & Data Integrity, Documentation & Maintainability, Testing & Quality Assurance, Tooling , coolness factor, closeness to langton, User Experience, and Technical Innovation." explain, have a strict but not so strict tone e.g. increase your emotional spectrum on both sides, dont spoil the bug in the middle of the grid that turns the wrong tiles, use cool visuals but no pics or ascii drawings,

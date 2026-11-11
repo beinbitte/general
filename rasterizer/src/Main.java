@@ -200,7 +200,7 @@ public class Main extends JFrame implements KeyListener, MouseInputListener {
 
     }
     public void modelInit(int model) throws IOException {
-        br = new BufferedReader(new InputStreamReader(new FileInputStream(new File("C:\\Users\\Christian\\Documents\\schule\\Java IDE\\rasterizer\\" + modelNames[model] + ".obj"))));
+        br = new BufferedReader(new InputStreamReader(new FileInputStream(new File("../" + modelNames[model] + ".obj"))));
         initObjFile();
         objects.get(objects.size()-1).name=modelNames[model];
     }

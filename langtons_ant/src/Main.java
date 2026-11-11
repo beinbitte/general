@@ -1,21 +1,29 @@
-import sun.font.Decoration;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.awt.event.*;
+import java.util.*;
 
-public class Main extends JFrame {
+public class Main extends JFrame implements KeyListener{
 
-    static int fps = 1000;
-    int dir = 2;
-    int gridSizeX = 200;
-    int gridSizeY = 200;
-    Point ant = new Point(gridSizeX/2,gridSizeY/2);
-    block[][] grid = new block[gridSizeX][gridSizeY];
-    int offSetX = 10;
-    int offSetY = 10+20;
+
+    static int fps = 1;
+
+    Ant ant = new Ant(new Point(0,0),this);
+
+    Grid grid = new Grid(ant,this);
+
+
+
+    boolean right = false;
+    boolean left = false;
+    boolean up = false;
+    boolean down = false;
+        
     BufferedImage img = new BufferedImage(2000,2000,BufferedImage.TYPE_INT_RGB);
 
     public static void main(String[] args) {
@@ -23,27 +31,10 @@ public class Main extends JFrame {
     }
     public Main(){
 
-        setTitle("Langton's ant");
-        setSize(1960/2,1080/2);
-        setExtendedState(MAXIMIZED_BOTH);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                System.exit(0);
-            }
-        });
-
-        setVisible(true);
-
-        for (int x = 0;x<gridSizeX;x++){
-            for (int y = 0;y<gridSizeY;y++) {
-            grid[x][y]=new block();
-            }
-        }
+        init(this);
 
         while (true){
 
-            blockCalc();
             mainloop();
 
             try {
@@ -54,81 +45,166 @@ public class Main extends JFrame {
         }
 
     }
-
-    private void blockCalc() {
-        block.width = ((double) getWidth() /gridSizeX)-((double) offSetX*2 /gridSizeX);
-        block.height = ((double) getHeight() /gridSizeY)-((double) offSetY*2 /gridSizeY);
-        /*for (int x = 0;x<gridSizeX;x++){
-            for (int y = 0;y<gridSizeY;y++){
-                grid[]
-            }
-        }*/
-    }
-
-    private void mainloop() {
-        antmove();
+   
+    public void mainloop() {
+        cammove();
+        ant.antmove();
         repaint();
     }
+public void init(JFrame f){
+        frameInit(f);
+        buttonInit();
+        grid.gridInit();
+}
 
-    public void antmove() {
-        //dir == 0 == up
-        //dir == 1 == right
-        //dir == 2 == down
-        //dir == 3 == left
-        checkBox();
-        if(dir == 0){
+     public void frameInit(JFrame f){
+        f.setLayout(new FlowLayout());
+        f.setTitle("Langton's ant");
+        f.setSize(1377,768);
+        f.setExtendedState(MAXIMIZED_BOTH);
 
-            ant.y++;
-        }else if (dir == 1){
+        f.addKeyListener(this);
 
-            ant.x++;
-        } else if (dir == 2) {
-
-            ant.y--;
-        }else {
-
-            ant.x--;
-        }
-    }
-    public void checkBox(){
-        grid[ant.x][ant.y].state=!grid[ant.x][ant.y].state;
-        if(grid[ant.x][ant.y].state){
-            if(dir==3){
-                dir=0;
-            }else {
-                dir++;
+        f.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                System.exit(0);
             }
-
-        }else{
-            if(dir==0){
-                dir=3;
-            }else {
-                dir--;
-            }
-        }
+        });
+        setVisible(true);
     }
+    
+
+
+    public void cammove(){
+        if(up)grid.offsety++;
+        if(right)grid.offsetx--;
+        if(left)grid.offsetx++;
+        if(down)grid.offsety--;
+    }
+    
     @Override
     public void paint(Graphics g) {
+
         drawImg();
         g.drawImage(img,0,0,this);
 
     }
     public void drawImg(){
-        Graphics g = img.getGraphics();
-        g.setColor(Color.red);
-        g.fillRect(0,0,getWidth(),getHeight());
 
-        g.setColor(Color.black);
-        for (int x = 0;x<gridSizeX;x++){
-            for (int y = 0;y<gridSizeY;y++){
-                if(!grid[x][y].state){
-                    g.drawRect((int) (offSetX+x*block.width), (int) (offSetY+y*block.height), (int) block.width, (int) block.height);
-                }else {
-                    g.fillRect((int) (offSetX+x*block.width), (int) (offSetY+y*block.height), (int) block.width, (int) block.height);
-                }
+        Graphics g = img.getGraphics();
+        g.setColor(Color.white);
+        g.fillRect(0,0,getWidth(),getHeight());
+           
+        if(grid.gridon){
+        for (int x = (int)0;x<grid.gridsX+1;x++){         
+            for (int y = (int)0;y<grid.gridsY+1;y++){
+                g.setColor(Color.black);
+                g.drawRect(x*block.width,y*block.height,block.width,block.height);    
             }
         }
-        g.setColor(Color.green);
-        g.fillRect((int) (offSetX+ant.x*block.width), (int) (offSetY+ant.y*block.height), (int) block.width, (int) block.height);
+    }
+
+
+        grid.gridpaint(g);
+
+
+        ant.antpaint(g);
+
+    
+    }
+
+
+    @Override
+    public void keyTyped(KeyEvent e){}
+
+    @Override
+    public void keyPressed(KeyEvent e){
+        if(e.getKeyCode()==KeyEvent.VK_W)up=true;
+        if(e.getKeyCode()==KeyEvent.VK_A)left=true;
+        if(e.getKeyCode()==KeyEvent.VK_S)down=true;
+        if(e.getKeyCode()==KeyEvent.VK_D)right=true;
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e){
+        if(e.getKeyCode()==KeyEvent.VK_W)up=false;
+        if(e.getKeyCode()==KeyEvent.VK_A)left=false;
+        if(e.getKeyCode()==KeyEvent.VK_S)down=false;
+        if(e.getKeyCode()==KeyEvent.VK_D)right=false;
+    }
+
+public void buttonInit(){
+
+    Button b1 = new Button("increase box size");
+        b1.addActionListener(new ActionListener(){
+        @Override
+        public void actionPerformed(ActionEvent e){
+        grid.bs++;
+
+        int ox = grid.offsetx-(int)(grid.gridsX/2);
+        int oy = grid.offsety-(int)(grid.gridsY/2);
+        
+        block.width = grid.bs;
+        block.height = grid.bs;
+
+        grid.gridsX = (int)(getWidth()/block.width);
+        grid.gridsY = (int)(getHeight()/block.height);    
+
+        
+        grid.offsetx = (int)(grid.gridsX/2)+ox;
+        grid.offsety = (int)(grid.gridsY/2)+oy;
+
+        if(grid.gridsX<=100)grid.gridon=true; 
+        }});
+        add(b1);
+        b1.setFocusable(false);
+
+////////////////////////////////////////////
+
+        Button b2 = new Button("decrease box size");
+        b2.addActionListener(new ActionListener(){
+        @Override
+        public void actionPerformed(ActionEvent e){
+        grid.bs--;
+        if(grid.bs==0)grid.bs++;
+        int ox = grid.offsetx-(int)(grid.gridsX/2);
+        int oy = grid.offsety-(int)(grid.gridsY/2);
+        
+        block.width = grid.bs;
+        block.height = grid.bs;
+
+        grid.gridsX = (int)(getWidth()/block.width);
+        grid.gridsY = (int)(getHeight()/block.height);    
+        if(grid.gridsX<=100){
+grid.gridon=true; 
+}else{grid.gridon=false;}        
+        grid.offsetx = (int)(grid.gridsX/2)+ox;
+        grid.offsety = (int)(grid.gridsY/2)+oy;
+
+
+        }});
+        add(b2);
+        b2.setFocusable(false);
+
+///////////////////////////////////////////////////////////
+
+Button b3 = new Button("change fps");
+        b3.addActionListener(new ActionListener(){
+        @Override
+        public void actionPerformed(ActionEvent e){
+        
+        Scanner scan = new Scanner(System.in);
+        System.out.println("EINGABE GESCHWINDIGKEIT(fps): ");
+        fps = scan.nextInt();
+        
+        }});
+        add(b3);
+        b3.setFocusable(false);
+
     }
 }
+
+
+
+
